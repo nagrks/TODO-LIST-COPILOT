@@ -1,9 +1,32 @@
+.todo-lists-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.todo-section {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.todo-section h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.completed-section {
+  border-top: 2px solid #e9ecef;
+  padding-top: 1rem;
+}
+
 .todo-list {
   list-style: none;
   padding: 0;
   width: 100%;
-  max-width: 500px;
-  margin: 20px auto;
+  margin: 0;
 }
 
 .todo-item {

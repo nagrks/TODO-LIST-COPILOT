@@ -175,6 +175,18 @@ function TodoListCopilot() {
     setValidationMessage("");
   };
 
+  /**
+   * Get incomplete todo items
+   * @returns {Array} Array of incomplete todos
+   */
+  const getIncompleteTodos = () => todos.filter(todo => !todo.completed);
+
+  /**
+   * Get completed todo items
+   * @returns {Array} Array of completed todos
+   */
+  const getCompletedTodos = () => todos.filter(todo => todo.completed);
+
   return (
     <div>
       <h2>Todo List</h2>
@@ -205,94 +217,103 @@ function TodoListCopilot() {
           </div>
         )}
       </form>
-      <ul className="todo-list">
-        {todos.map((todo, idx) => (
-          <li key={idx} className={todo.completed ? 'completed' : ''}>
-            <div className="todo-item">
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => toggleTodo(idx)}
-                aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
-              />
-              {editingIndex === idx ? (
-                <div className="edit-container">
-                  <input
-                    type="text"
-                    value={editInput}
-                    onChange={(e) => {
-                      setEditInput(e.target.value);
-                      setValidationMessage("");
-                    }}
-                    onKeyPress={(e) => e.key === 'Enter' && saveEdit(idx)}
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => saveEdit(idx)}
-                    aria-label="Save changes"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={cancelEdit}
-                    aria-label="Cancel editing"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
-                    {todo.text}
-                  </span>
-                  <div className="button-container">
-                    <button
-                      onClick={() => startEditing(idx)}
-                      aria-label={`Edit todo "${todo.text}"`}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => removeTodo(idx)}
-                      aria-label={`Delete todo "${todo.text}"`}
-                    >
-                      Delete
-                    </button>
+
+      <div className="todo-lists-container">
+        <section className="todo-section">
+          <h3>Active Tasks</h3>
+          <ul className="todo-list">
+            {getIncompleteTodos().map((todo, idx) => {
+              const originalIndex = todos.indexOf(todo);
+              return (
+                <li key={originalIndex} className="active">
+                  <div className="todo-item">
+                    <input
+                      type="checkbox"
+                      checked={false}
+                      onChange={() => toggleTodo(originalIndex)}
+                      aria-label={`Mark "${todo.text}" as complete`}
+                    />
+                    {editingIndex === originalIndex ? (
+                      <div className="edit-container">
+                        <input
+                          type="text"
+                          value={editInput}
+                          onChange={(e) => {
+                            setEditInput(e.target.value);
+                            setValidationMessage("");
+                          }}
+                          onKeyPress={(e) => e.key === 'Enter' && saveEdit(originalIndex)}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => saveEdit(originalIndex)}
+                          aria-label="Save changes"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          aria-label="Cancel editing"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span>{todo.text}</span>
+                        <div className="button-container">
+                          <button
+                            onClick={() => startEditing(originalIndex)}
+                            aria-label={`Edit todo "${todo.text}"`}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => removeTodo(originalIndex)}
+                            aria-label={`Delete todo "${todo.text}"`}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
-                </>
-              )}
-              <button
-                onClick={() => startEditing(idx)}
-                aria-label={`Edit todo "${todo.text}"`}
-              >
-                Edit
-              </button>
-            </div>
-            {editingIndex === idx && (
-              <div className="edit-container">
-                <input
-                  value={editInput}
-                  onChange={(e) => setEditInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && saveEdit(idx)}
-                  aria-label={`Edit todo "${todo.text}"`}
-                />
-                <button
-                  onClick={() => saveEdit(idx)}
-                  aria-label={`Save edit for todo "${todo.text}"`}
-                >
-                  Save
-                </button>
-                <button
-                  onClick={cancelEdit}
-                  aria-label="Cancel edit"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        <section className="todo-section completed-section">
+          <h3>Completed Tasks</h3>
+          <ul className="todo-list">
+            {getCompletedTodos().map((todo, idx) => {
+              const originalIndex = todos.indexOf(todo);
+              return (
+                <li key={originalIndex} className="completed">
+                  <div className="todo-item">
+                    <input
+                      type="checkbox"
+                      checked={true}
+                      onChange={() => toggleTodo(originalIndex)}
+                      aria-label={`Mark "${todo.text}" as incomplete`}
+                    />
+                    <span style={{ textDecoration: 'line-through' }}>{todo.text}</span>
+                    <div className="button-container">
+                      <button
+                        onClick={() => removeTodo(originalIndex)}
+                        aria-label={`Delete completed todo "${todo.text}"`}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </div>
     </div>
   );
 }

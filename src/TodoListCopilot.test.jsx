@@ -317,4 +317,74 @@ describe('TodoListCopilot', () => {
       expect(screen.getByText('Second todo')).toBeInTheDocument();
     });
   });
+
+  describe('Todo Sections', () => {
+    test('should move completed todos to completed section', () => {
+      // Add todos
+      ['First Todo', 'Second Todo', 'Third Todo'].forEach(todo => {
+        fireEvent.change(input, { target: { value: todo } });
+        fireEvent.click(addButton);
+      });
+
+      // Complete the second todo
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      // Verify sections
+      const activeTodos = screen.getByText('Active Tasks')
+        .parentElement.querySelectorAll('li');
+      const completedTodos = screen.getByText('Completed Tasks')
+        .parentElement.querySelectorAll('li');
+
+      expect(activeTodos).toHaveLength(2);
+      expect(completedTodos).toHaveLength(1);
+      
+      // Verify content
+      expect(within(activeTodos[0]).getByText('First Todo')).toBeInTheDocument();
+      expect(within(activeTodos[1]).getByText('Third Todo')).toBeInTheDocument();
+      expect(within(completedTodos[0]).getByText('Second Todo')).toBeInTheDocument();
+    });
+
+    test('should move todos between sections when toggling completion', () => {
+      // Add and complete a todo
+      fireEvent.change(input, { target: { value: 'Test Todo' } });
+      fireEvent.click(addButton);
+      
+      const checkbox = screen.getByRole('checkbox');
+      
+      // Complete the todo
+      fireEvent.click(checkbox);
+      
+      let activeTodos = screen.getByText('Active Tasks')
+        .parentElement.querySelectorAll('li');
+      let completedTodos = screen.getByText('Completed Tasks')
+        .parentElement.querySelectorAll('li');
+      
+      expect(activeTodos).toHaveLength(0);
+      expect(completedTodos).toHaveLength(1);
+      
+      // Uncomplete the todo
+      fireEvent.click(screen.getByRole('checkbox'));
+      
+      activeTodos = screen.getByText('Active Tasks')
+        .parentElement.querySelectorAll('li');
+      completedTodos = screen.getByText('Completed Tasks')
+        .parentElement.querySelectorAll('li');
+      
+      expect(activeTodos).toHaveLength(1);
+      expect(completedTodos).toHaveLength(0);
+    });
+
+    test('should only show edit button for incomplete todos', () => {
+      // Add a todo and complete it
+      fireEvent.change(input, { target: { value: 'Test Todo' } });
+      fireEvent.click(addButton);
+      fireEvent.click(screen.getByRole('checkbox'));
+
+      // Verify edit button is not present for completed todo
+      const completedTodo = screen.getByText('Completed Tasks')
+        .parentElement.querySelector('li');
+      expect(within(completedTodo).queryByText('Edit')).not.toBeInTheDocument();
+    });
+  });
 });
