@@ -1,0 +1,147 @@
+import React from 'react';
+import { render, screen, fireEvent, within } from '@testing-library/react';import '@testing-library/jest-dom';
+import TodoListCopilot from './TodoListCopilot';
+
+describe('TodoListCopilot', () => {
+  let input;
+  let addButton;
+
+  beforeEach(() => {
+    render(<TodoListCopilot />);
+    input = screen.getByPlaceholderText('Add a todo');
+    addButton = screen.getByText('Add');
+  });
+
+  describe('Initial Rendering', () => {
+    test('renders todo list with header and empty state', () => {
+      expect(screen.getByText('Todo List')).toBeInTheDocument();
+      expect(screen.queryAllByText('Delete').length).toBe(0);
+      expect(input).toHaveValue('');
+    });
+
+    test('input should be focused by default for better UX', () => {
+      expect(input).toHaveFocus();
+    });
+  });
+
+  describe('Adding Todos', () => {
+    test('should add todo with keyboard Enter key', () => {
+      fireEvent.change(input, { target: { value: 'Submit with Enter' } });
+      fireEvent.keyPress(input, { key: 'Enter', code: 13, charCode: 13 });
+      
+      expect(screen.getByText('Submit with Enter')).toBeInTheDocument();
+      expect(input).toHaveValue('');
+    });
+
+    test('should handle todos with special characters', () => {
+      const todoWithSpecialChars = '!@#$ Special % Characters &*()';
+      fireEvent.change(input, { target: { value: todoWithSpecialChars } });
+      fireEvent.click(addButton);
+
+      expect(screen.getByText(todoWithSpecialChars)).toBeInTheDocument();
+    });
+
+    test('should handle todos with emojis', () => {
+      const todoWithEmojis = '📝 Write documentation 🎉';
+      fireEvent.change(input, { target: { value: todoWithEmojis } });
+      fireEvent.click(addButton);
+
+      expect(screen.getByText(todoWithEmojis)).toBeInTheDocument();
+    });
+
+    test('should trim whitespace from todos', () => {
+      fireEvent.change(input, { target: { value: '   Trim this todo   ' } });
+      fireEvent.click(addButton);
+
+      expect(screen.getByText('Trim this todo')).toBeInTheDocument();
+    });
+
+    test('should handle long todo text gracefully', () => {
+      const longTodo = 'This is a very long todo item that might need to be handled properly in terms of display and wrapping in the UI to ensure good user experience';
+      fireEvent.change(input, { target: { value: longTodo } });
+      fireEvent.click(addButton);
+
+      const todoElement = screen.getByText(longTodo);
+      expect(todoElement).toBeInTheDocument();
+      expect(todoElement).toBeVisible();
+    });
+  });
+
+  describe('Todo Management', () => {
+    test('should maintain todo order when deleting items', () => {
+      // Add three todos
+      ['First Task', 'Second Task', 'Third Task'].forEach(todo => {
+        fireEvent.change(input, { target: { value: todo } });
+        fireEvent.click(addButton);
+      });
+
+      // Delete the second task
+      const todoItems = screen.getAllByText(/Task/);
+      const secondTaskDeleteBtn = within(todoItems[1].parentElement).getByText('Delete');
+      fireEvent.click(secondTaskDeleteBtn);
+
+      // Verify remaining todos are in correct order
+      const remainingTodos = screen.getAllByText(/Task/);
+      expect(remainingTodos[0]).toHaveTextContent('First Task');
+      expect(remainingTodos[1]).toHaveTextContent('Third Task');
+    });
+
+    test('should handle rapid addition and deletion of todos', () => {
+      // Rapidly add multiple todos
+      const todos = ['Quick Task 1', 'Quick Task 2', 'Quick Task 3'];
+      todos.forEach(todo => {
+        fireEvent.change(input, { target: { value: todo } });
+        fireEvent.click(addButton);
+      });
+
+      // Delete todos one by one from the start
+      todos.forEach(() => {
+        const firstDeleteButton = screen.getAllByText('Delete')[0];
+        fireEvent.click(firstDeleteButton);
+      });
+
+      // Verify all todos are removed
+      expect(screen.queryByText(/Quick Task/)).not.toBeInTheDocument();
+    });
+
+    test('should prevent XSS attempts in todo items', () => {
+      const maliciousScript = '<script>alert("xss")</script>';
+      fireEvent.change(input, { target: { value: maliciousScript } });
+      fireEvent.click(addButton);
+
+      const todoElement = screen.getByText(maliciousScript);
+      expect(todoElement.innerHTML).not.toBe(maliciousScript);
+    });
+
+    test('should handle duplicate todo items', () => {
+      const duplicateTodo = 'Duplicate Todo';
+      
+      // Add the same todo twice
+      fireEvent.change(input, { target: { value: duplicateTodo } });
+      fireEvent.click(addButton);
+      fireEvent.change(input, { target: { value: duplicateTodo } });
+      fireEvent.click(addButton);
+
+      const duplicateTodos = screen.getAllByText(duplicateTodo);
+      expect(duplicateTodos).toHaveLength(2);
+    });
+  });
+
+  describe('Accessibility', () => {
+    test('should have accessible buttons with clear purposes', () => {
+      fireEvent.change(input, { target: { value: 'Accessibility Test' } });
+      fireEvent.click(addButton);
+
+      expect(addButton).toHaveAttribute('aria-label', 'Add todo');
+      const deleteButton = screen.getByText('Delete');
+      expect(deleteButton).toHaveAttribute('aria-label', 'Delete todo');
+    });
+
+    test('should maintain focus after adding todo', () => {
+      fireEvent.change(input, { target: { value: 'New Todo' } });
+      fireEvent.click(addButton);
+      
+      expect(input).toHaveFocus();
+    });
+  });
+});
