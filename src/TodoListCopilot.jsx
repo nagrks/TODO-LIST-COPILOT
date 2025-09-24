@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import './TodoListCopilot.css';
 
 /**
  * TodoListCopilot is a React component that implements a simple but feature-rich todo list.
@@ -104,16 +105,26 @@ function TodoListCopilot() {
           Add
         </button>
       </form>
-      <ul>
+      <ul className="todo-list">
         {todos.map((todo, idx) => (
-          <li key={idx}>
-            <span>{todo}</span>
-            <button
-              onClick={() => removeTodo(idx)}
-              aria-label="Delete todo"
-            >
-              Delete
-            </button>
+          <li key={idx} className={todo.completed ? 'completed' : ''}>
+            <div className="todo-item">
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleTodo(idx)}
+                aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
+              />
+              <span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+                {todo.text}
+              </span>
+              <button
+                onClick={() => removeTodo(idx)}
+                aria-label={`Delete todo "${todo.text}"`}
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>

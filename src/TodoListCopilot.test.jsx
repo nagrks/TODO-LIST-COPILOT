@@ -134,7 +134,7 @@ describe('TodoListCopilot', () => {
 
       expect(addButton).toHaveAttribute('aria-label', 'Add todo');
       const deleteButton = screen.getByText('Delete');
-      expect(deleteButton).toHaveAttribute('aria-label', 'Delete todo');
+      expect(deleteButton).toHaveAttribute('aria-label', expect.stringContaining('Delete todo'));
     });
 
     test('should maintain focus after adding todo', () => {
@@ -142,6 +142,62 @@ describe('TodoListCopilot', () => {
       fireEvent.click(addButton);
       
       expect(input).toHaveFocus();
+    });
+  });
+
+  describe('Todo Completion', () => {
+    test('should toggle todo completion status', () => {
+      // Add a todo
+      fireEvent.change(input, { target: { value: 'Test Todo' } });
+      fireEvent.click(addButton);
+
+      // Get the checkbox
+      const checkbox = screen.getByRole('checkbox');
+      expect(checkbox).not.toBeChecked();
+
+      // Toggle completion
+      fireEvent.click(checkbox);
+      expect(checkbox).toBeChecked();
+
+      // Verify text decoration
+      const todoText = screen.getByText('Test Todo');
+      expect(todoText).toHaveStyle({ textDecoration: 'line-through' });
+
+      // Toggle back to incomplete
+      fireEvent.click(checkbox);
+      expect(checkbox).not.toBeChecked();
+      expect(todoText).toHaveStyle({ textDecoration: 'none' });
+    });
+
+    test('should maintain completion status after adding new todos', () => {
+      // Add and complete first todo
+      fireEvent.change(input, { target: { value: 'First Todo' } });
+      fireEvent.click(addButton);
+      const firstCheckbox = screen.getByRole('checkbox');
+      fireEvent.click(firstCheckbox);
+      expect(firstCheckbox).toBeChecked();
+
+      // Add second todo
+      fireEvent.change(input, { target: { value: 'Second Todo' } });
+      fireEvent.click(addButton);
+
+      // Verify first todo remains completed
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes[0]).toBeChecked();
+      expect(checkboxes[1]).not.toBeChecked();
+    });
+
+    test('should have accessible checkbox labels', () => {
+      fireEvent.change(input, { target: { value: 'Accessibility Todo' } });
+      fireEvent.click(addButton);
+
+      const checkbox = screen.getByRole('checkbox');
+      expect(checkbox).toHaveAttribute('aria-label', expect.stringContaining('Accessibility Todo'));
+      expect(checkbox).toHaveAttribute('aria-label', expect.stringContaining('complete'));
+
+      // After checking
+      fireEvent.click(checkbox);
+      expect(checkbox).toHaveAttribute('aria-label', expect.stringContaining('incomplete'));
     });
   });
 });
