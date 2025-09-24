@@ -34,6 +34,9 @@ function TodoListCopilot() {
 
   /** @type {[string, Function]} State for edit input value */
   const [editInput, setEditInput] = useState("");
+
+  /** @type {[boolean, Function]} State for "Add as completed" checkbox */
+  const [addAsCompleted, setAddAsCompleted] = useState(false);
   
   /** @type {React.RefObject<HTMLInputElement>} Reference to the input field for focus management */
   const inputRef = useRef(null);
@@ -60,9 +63,10 @@ function TodoListCopilot() {
       return;
     }
     
-    setTodos([...todos, { text: result.formattedText, completed: false }]);
+    setTodos([...todos, { text: result.formattedText, completed: addAsCompleted }]);
     setInput("");
     setValidationMessage("");
+    setAddAsCompleted(false); // Reset the checkbox after adding the todo
   };
 
   /**
@@ -203,6 +207,16 @@ function TodoListCopilot() {
             placeholder="Add a todo"
             aria-label="Add a new todo item"
           />
+          <div className="add-completed-checkbox">
+            <input
+              type="checkbox"
+              id="addCompleted"
+              checked={addAsCompleted}
+              onChange={(e) => setAddAsCompleted(e.target.checked)}
+              aria-label="Add as completed"
+            />
+            <label htmlFor="addCompleted">Add as completed</label>
+          </div>
           <button
             type="submit"
             onClick={addTodo}

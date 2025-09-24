@@ -66,6 +66,39 @@ describe('TodoListCopilot', () => {
       expect(todoElement).toBeInTheDocument();
       expect(todoElement).toBeVisible();
     });
+
+    test('should add todo as completed when checkbox is checked', () => {
+      // Get the "Add as completed" checkbox
+      const addCompletedCheckbox = screen.getByLabelText('Add as completed');
+      
+      // Check the "Add as completed" checkbox
+      fireEvent.click(addCompletedCheckbox);
+      
+      // Add a new todo
+      fireEvent.change(input, { target: { value: 'Completed from start' } });
+      fireEvent.click(addButton);
+      
+      // Verify the todo is in completed section
+      const completedTodos = screen.getByText('Completed Tasks')
+        .parentElement.querySelectorAll('li');
+      expect(completedTodos).toHaveLength(1);
+      expect(within(completedTodos[0]).getByText('Completed from start')).toBeInTheDocument();
+      
+      // Verify checkbox is checked
+      const todoCheckbox = within(completedTodos[0]).getByRole('checkbox');
+      expect(todoCheckbox).toBeChecked();
+      
+      // Verify "Add as completed" checkbox is automatically unchecked
+      expect(addCompletedCheckbox).not.toBeChecked();
+      fireEvent.change(input, { target: { value: 'Normal todo' } });
+      fireEvent.click(addButton);
+      
+      // Verify it's in active section
+      const activeTodos = screen.getByText('Active Tasks')
+        .parentElement.querySelectorAll('li');
+      expect(activeTodos).toHaveLength(1);
+      expect(within(activeTodos[0]).getByText('Normal todo')).toBeInTheDocument();
+    });
   });
 
   describe('Todo Management', () => {

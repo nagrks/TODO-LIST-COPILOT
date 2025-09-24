@@ -155,3 +155,20 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background-color: #218838;
 }
+
+.add-completed-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 1rem;
+}
+
+.add-completed-checkbox label {
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.add-completed-checkbox input[type="checkbox"] {
+  cursor: pointer;
+}
