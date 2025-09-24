@@ -33,20 +33,20 @@ describe('TodoListCopilot', () => {
       expect(input).toHaveValue('');
     });
 
-    test('should handle todos with special characters', () => {
+    test('should handle and clean special characters', () => {
       const todoWithSpecialChars = '!@#$ Special % Characters &*()';
       fireEvent.change(input, { target: { value: todoWithSpecialChars } });
       fireEvent.click(addButton);
 
-      expect(screen.getByText(todoWithSpecialChars)).toBeInTheDocument();
+      expect(screen.getByText('Special characters')).toBeInTheDocument();
     });
 
-    test('should handle todos with emojis', () => {
+    test('should remove non-alphanumeric characters', () => {
       const todoWithEmojis = '📝 Write documentation 🎉';
       fireEvent.change(input, { target: { value: todoWithEmojis } });
       fireEvent.click(addButton);
 
-      expect(screen.getByText(todoWithEmojis)).toBeInTheDocument();
+      expect(screen.getByText('Write documentation')).toBeInTheDocument();
     });
 
     test('should trim whitespace from todos', () => {

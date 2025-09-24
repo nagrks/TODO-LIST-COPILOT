@@ -47,7 +47,13 @@ function TodoListCopilot() {
     e?.preventDefault(); // Handle form submission
     const trimmedInput = input.trim();
     if (trimmedInput === "") return;
-    setTodos([...todos, { text: trimmedInput, completed: false }]);
+    
+    // Only allow alphanumeric characters and capitalize first letter
+    const alphanumericOnly = trimmedInput.replace(/[^a-zA-Z0-9\s]/g, '');
+    const capitalizedText = alphanumericOnly.charAt(0).toUpperCase() + alphanumericOnly.slice(1).toLowerCase();
+    
+    if (capitalizedText === "") return; // If no valid characters remain, don't add the todo
+    setTodos([...todos, { text: capitalizedText, completed: false }]);
     setInput("");
   };
 
