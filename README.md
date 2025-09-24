@@ -13,21 +13,40 @@ A modern, accessible, and feature-rich Todo List application built with React an
 ### Functionality
 
 - Add todos with text input
+- Edit existing todos
 - Remove individual todos
-- Auto-focus on input field for better UX
-- Support for special characters and emojis
-- Proper handling of long text
+- Toggle todo completion with checkboxes
+- Smart input validation:
+  - Alphanumeric characters only (letters and numbers)
+  - Automatic first letter capitalization
+  - Whitespace trimming
+  - Duplicate prevention (case-insensitive)
 - Form submission with Enter key
-- Input validation and whitespace trimming
+- Auto-focus on input fields for better UX
+- Proper handling of long text
+- Clear validation messages
+- Cancel/Save options while editing
 
 ### Technical Features
 
 - React Hooks for state management
 - Vite for fast development and building
 - Modern JavaScript features
-- ARIA labels for accessibility
-- Comprehensive Jest test suite
-- Proper event handling
+- Accessibility:
+  - ARIA labels for all interactive elements
+  - Screen reader-friendly announcements
+  - Keyboard navigation support
+- Comprehensive Jest test suite:
+  - Input validation tests
+  - Duplicate prevention tests
+  - Editing functionality tests
+  - Accessibility compliance tests
+- Git version control:
+  - Semantic commit messages
+  - Feature-based commits
+  - Clean commit history
+- Proper error handling and validation
+- Responsive CSS styling
 - Focus management
 - XSS prevention
 
@@ -159,3 +178,46 @@ npm run preview  # Preview production build
 npm test        # Run tests
 npm run lint    # Run ESLint
 ```
+
+## Validation Rules
+
+The application enforces the following validation rules for todo items:
+
+1. Character Restrictions:
+   - Only letters (a-z, A-Z), numbers (0-9), and spaces are allowed
+   - Special characters and emojis are automatically removed
+   - First letter is automatically capitalized
+   - Rest of the text is converted to lowercase
+
+2. Duplicate Prevention:
+   - Case-insensitive duplicate detection
+   - Prevents adding duplicate todos
+   - Prevents editing a todo to match an existing one
+   - Clear error messages for duplicate attempts
+
+3. Input Cleaning:
+   - Trims leading and trailing whitespace
+   - Empty todos are not allowed
+   - Maintains proper spacing between words
+
+## Version History
+
+### Version 1.0.0
+- Initial release with basic todo functionality
+- Add, delete, and complete todos
+- Basic validation and accessibility
+
+### Version 1.1.0
+- Added todo item editing
+- Improved accessibility features
+- Enhanced test coverage
+
+### Version 1.2.0
+- Implemented alphanumeric character restriction
+- Added automatic text formatting
+- Enhanced validation messages
+
+### Version 1.3.0
+- Added case-insensitive duplicate prevention
+- Enhanced edit mode validation
+- Updated documentation
