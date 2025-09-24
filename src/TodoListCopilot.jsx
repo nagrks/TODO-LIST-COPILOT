@@ -104,7 +104,7 @@ function TodoListCopilot() {
    * @param {string} text - The text to validate and format
    * @returns {{ isValid: boolean, formattedText: string }} Validation result and formatted text
    */
-  const validateAndFormatText = (text) => {
+  const validateAndFormatText = (text, excludeIndex = -1) => {
     const trimmedText = text.trim();
     if (trimmedText === "") {
       return { isValid: false, formattedText: "", message: "Please enter a todo item" };
@@ -118,7 +118,25 @@ function TodoListCopilot() {
     // Format the text
     const alphanumericOnly = trimmedText.replace(/[^a-zA-Z0-9\s]/g, '');
     const formattedText = alphanumericOnly.charAt(0).toUpperCase() + alphanumericOnly.slice(1).toLowerCase();
+    
+    // Check for duplicates
+    if (isDuplicate(formattedText, excludeIndex)) {
+      return { isValid: false, formattedText: "", message: "This todo item already exists" };
+    }
+
     return { isValid: true, formattedText, message: "" };
+  };
+
+  /**
+   * Checks if a todo text already exists (case-insensitive)
+   * @param {string} text - The text to check
+   * @param {number} excludeIndex - Index to exclude from the check (for editing)
+   * @returns {boolean} True if the text is a duplicate
+   */
+  const isDuplicate = (text, excludeIndex = -1) => {
+    return todos.some((todo, index) => 
+      index !== excludeIndex && todo.text.toLowerCase() === text.toLowerCase()
+    );
   };
 
   /**
@@ -136,7 +154,7 @@ function TodoListCopilot() {
    * @param {number} index - The index of the todo being edited
    */
   const saveEdit = (index) => {
-    const result = validateAndFormatText(editInput);
+    const result = validateAndFormatText(editInput, index);
     if (!result.isValid) {
       setValidationMessage(result.message);
       return;

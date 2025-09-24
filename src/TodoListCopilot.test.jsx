@@ -114,17 +114,27 @@ describe('TodoListCopilot', () => {
       expect(todoElement.innerHTML).not.toBe(maliciousScript);
     });
 
-    test('should handle duplicate todo items', () => {
-      const duplicateTodo = 'Duplicate Todo';
+    test('should prevent duplicate todo items', () => {
+      const todoText = 'Unique Todo';
       
-      // Add the same todo twice
-      fireEvent.change(input, { target: { value: duplicateTodo } });
-      fireEvent.click(addButton);
-      fireEvent.change(input, { target: { value: duplicateTodo } });
+      // Add first todo
+      fireEvent.change(input, { target: { value: todoText } });
       fireEvent.click(addButton);
 
-      const duplicateTodos = screen.getAllByText(duplicateTodo);
-      expect(duplicateTodos).toHaveLength(2);
+      // Try to add the same todo again
+      fireEvent.change(input, { target: { value: todoText } });
+      fireEvent.click(addButton);
+
+      // Verify duplicate message and only one todo exists
+      expect(screen.getByText('This todo item already exists')).toBeInTheDocument();
+      expect(screen.getAllByText(todoText)).toHaveLength(1);
+
+      // Try with different case
+      fireEvent.change(input, { target: { value: todoText.toUpperCase() } });
+      fireEvent.click(addButton);
+
+      expect(screen.getByText('This todo item already exists')).toBeInTheDocument();
+      expect(screen.getAllByText(todoText)).toHaveLength(1);
     });
   });
 
@@ -277,6 +287,34 @@ describe('TodoListCopilot', () => {
       // Verify original text remains
       expect(screen.getByText('Original todo')).toBeInTheDocument();
       expect(screen.queryByDisplayValue('Changed todo')).not.toBeInTheDocument();
+    });
+
+    test('should prevent duplicate edits', () => {
+      // Add two todos
+      fireEvent.change(input, { target: { value: 'First todo' } });
+      fireEvent.click(addButton);
+      fireEvent.change(input, { target: { value: 'Second todo' } });
+      fireEvent.click(addButton);
+
+      // Try to edit second todo to match first todo
+      const editButton = screen.getByLabelText('Edit todo "Second todo"');
+      fireEvent.click(editButton);
+
+      const editInput = screen.getByDisplayValue('Second todo');
+      fireEvent.change(editInput, { target: { value: 'First todo' } });
+      const saveButton = screen.getByText('Save');
+      fireEvent.click(saveButton);
+
+      // Verify error message and no changes made
+      expect(screen.getByText('This todo item already exists')).toBeInTheDocument();
+      expect(screen.getByText('Second todo')).toBeInTheDocument();
+
+      // Try with different case
+      fireEvent.change(editInput, { target: { value: 'FIRST TODO' } });
+      fireEvent.click(saveButton);
+
+      expect(screen.getByText('This todo item already exists')).toBeInTheDocument();
+      expect(screen.getByText('Second todo')).toBeInTheDocument();
     });
   });
 });
