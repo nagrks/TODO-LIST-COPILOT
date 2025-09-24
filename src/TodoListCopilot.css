@@ -48,6 +48,19 @@
 
 form {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-container {
+  display: flex;
+}
+
+.validation-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: -4px;
+  padding-left: 4px;
   gap: 10px;
   margin: 20px 0;
   max-width: 500px;

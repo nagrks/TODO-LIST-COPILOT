@@ -26,6 +26,9 @@ function TodoListCopilot() {
   /** @type {[string, Function]} State for input field value */
   const [input, setInput] = useState("");
   
+  /** @type {[string, Function]} State for validation message */
+  const [validationMessage, setValidationMessage] = useState("");
+  
   /** @type {React.RefObject<HTMLInputElement>} Reference to the input field for focus management */
   const inputRef = useRef(null);
 
@@ -46,13 +49,22 @@ function TodoListCopilot() {
   const addTodo = (e) => {
     e?.preventDefault(); // Handle form submission
     const trimmedInput = input.trim();
-    if (trimmedInput === "") return;
+    if (trimmedInput === "") {
+      setValidationMessage("Please enter a todo item");
+      return;
+    }
+    
+    // Check for non-alphanumeric characters
+    if (/[^a-zA-Z0-9\s]/.test(trimmedInput)) {
+      setValidationMessage("Only letters, numbers, and spaces are allowed");
+      return;
+    }
     
     // Only allow alphanumeric characters and capitalize first letter
     const alphanumericOnly = trimmedInput.replace(/[^a-zA-Z0-9\s]/g, '');
     const capitalizedText = alphanumericOnly.charAt(0).toUpperCase() + alphanumericOnly.slice(1).toLowerCase();
     
-    if (capitalizedText === "") return; // If no valid characters remain, don't add the todo
+    setValidationMessage(""); // Clear validation message on success
     setTodos([...todos, { text: capitalizedText, completed: false }]);
     setInput("");
   };
@@ -95,21 +107,31 @@ function TodoListCopilot() {
     <div>
       <h2>Todo List</h2>
       <form onSubmit={addTodo}>
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Add a todo"
-          aria-label="Add a new todo item"
-        />
-        <button
-          type="submit"
-          onClick={addTodo}
-          aria-label="Add todo"
-        >
-          Add
-        </button>
+        <div className="input-container">
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setValidationMessage(""); // Clear validation message when user starts typing
+            }}
+            onKeyPress={handleKeyPress}
+            placeholder="Add a todo"
+            aria-label="Add a new todo item"
+          />
+          <button
+            type="submit"
+            onClick={addTodo}
+            aria-label="Add todo"
+          >
+            Add
+          </button>
+        </div>
+        {validationMessage && (
+          <div className="validation-message" role="alert">
+            {validationMessage}
+          </div>
+        )}
       </form>
       <ul className="todo-list">
         {todos.map((todo, idx) => (

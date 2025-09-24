@@ -33,12 +33,13 @@ describe('TodoListCopilot', () => {
       expect(input).toHaveValue('');
     });
 
-    test('should handle and clean special characters', () => {
+    test('should show validation message for special characters', () => {
       const todoWithSpecialChars = '!@#$ Special % Characters &*()';
       fireEvent.change(input, { target: { value: todoWithSpecialChars } });
       fireEvent.click(addButton);
 
-      expect(screen.getByText('Special characters')).toBeInTheDocument();
+      expect(screen.getByText('Only letters, numbers, and spaces are allowed')).toBeInTheDocument();
+      expect(screen.queryByText('Special characters')).not.toBeInTheDocument();
     });
 
     test('should remove non-alphanumeric characters', () => {
