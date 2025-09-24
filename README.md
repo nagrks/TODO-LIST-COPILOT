@@ -12,20 +12,30 @@ A modern, accessible, and feature-rich Todo List application built with React an
 
 ### Functionality
 
-- Add todos with text input
-- Edit existing todos
-- Remove individual todos
-- Toggle todo completion with checkboxes
-- Smart input validation:
+- Task Organization:
+  - Separate sections for active and completed tasks
+  - Automatic task movement between sections
+  - Clean visual separation of sections
+  - Completion status preserved when moving tasks
+
+- Task Management:
+  - Add new todos with text input
+  - Edit existing active todos
+  - Remove todos from any section
+  - Toggle completion with checkboxes
+
+- Smart Input Validation:
   - Alphanumeric characters only (letters and numbers)
   - Automatic first letter capitalization
   - Whitespace trimming
   - Duplicate prevention (case-insensitive)
-- Form submission with Enter key
-- Auto-focus on input fields for better UX
-- Proper handling of long text
-- Clear validation messages
-- Cancel/Save options while editing
+
+- User Experience:
+  - Form submission with Enter key
+  - Auto-focus on input fields
+  - Clear validation messages
+  - Edit/Cancel/Save options for active tasks
+  - Proper handling of long text
 
 ### Technical Features
 
@@ -221,3 +231,9 @@ The application enforces the following validation rules for todo items:
 - Added case-insensitive duplicate prevention
 - Enhanced edit mode validation
 - Updated documentation
+
+### Version 1.4.0
+- Added separate sections for active and completed tasks
+- Automatic task movement on status change
+- Enhanced UI with section headers
+- Limited editing to active tasks only
