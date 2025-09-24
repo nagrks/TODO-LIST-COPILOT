@@ -28,6 +28,12 @@ function TodoListCopilot() {
   
   /** @type {[string, Function]} State for validation message */
   const [validationMessage, setValidationMessage] = useState("");
+
+  /** @type {[number, Function]} State for tracking which todo is being edited */
+  const [editingIndex, setEditingIndex] = useState(-1);
+
+  /** @type {[string, Function]} State for edit input value */
+  const [editInput, setEditInput] = useState("");
   
   /** @type {React.RefObject<HTMLInputElement>} Reference to the input field for focus management */
   const inputRef = useRef(null);
@@ -48,25 +54,15 @@ function TodoListCopilot() {
    */
   const addTodo = (e) => {
     e?.preventDefault(); // Handle form submission
-    const trimmedInput = input.trim();
-    if (trimmedInput === "") {
-      setValidationMessage("Please enter a todo item");
+    const result = validateAndFormatText(input);
+    if (!result.isValid) {
+      setValidationMessage(result.message);
       return;
     }
     
-    // Check for non-alphanumeric characters
-    if (/[^a-zA-Z0-9\s]/.test(trimmedInput)) {
-      setValidationMessage("Only letters, numbers, and spaces are allowed");
-      return;
-    }
-    
-    // Only allow alphanumeric characters and capitalize first letter
-    const alphanumericOnly = trimmedInput.replace(/[^a-zA-Z0-9\s]/g, '');
-    const capitalizedText = alphanumericOnly.charAt(0).toUpperCase() + alphanumericOnly.slice(1).toLowerCase();
-    
-    setValidationMessage(""); // Clear validation message on success
-    setTodos([...todos, { text: capitalizedText, completed: false }]);
+    setTodos([...todos, { text: result.formattedText, completed: false }]);
     setInput("");
+    setValidationMessage("");
   };
 
   /**
@@ -101,6 +97,64 @@ function TodoListCopilot() {
     if (e.key === 'Enter') {
       addTodo(e);
     }
+  };
+
+  /**
+   * Validates and formats text according to alphanumeric rules
+   * @param {string} text - The text to validate and format
+   * @returns {{ isValid: boolean, formattedText: string }} Validation result and formatted text
+   */
+  const validateAndFormatText = (text) => {
+    const trimmedText = text.trim();
+    if (trimmedText === "") {
+      return { isValid: false, formattedText: "", message: "Please enter a todo item" };
+    }
+
+    // Check for non-alphanumeric characters
+    if (/[^a-zA-Z0-9\s]/.test(trimmedText)) {
+      return { isValid: false, formattedText: "", message: "Only letters, numbers, and spaces are allowed" };
+    }
+
+    // Format the text
+    const alphanumericOnly = trimmedText.replace(/[^a-zA-Z0-9\s]/g, '');
+    const formattedText = alphanumericOnly.charAt(0).toUpperCase() + alphanumericOnly.slice(1).toLowerCase();
+    return { isValid: true, formattedText, message: "" };
+  };
+
+  /**
+   * Starts editing a todo item
+   * @param {number} index - The index of the todo to edit
+   */
+  const startEditing = (index) => {
+    setEditingIndex(index);
+    setEditInput(todos[index].text);
+    setValidationMessage("");
+  };
+
+  /**
+   * Saves the edited todo item
+   * @param {number} index - The index of the todo being edited
+   */
+  const saveEdit = (index) => {
+    const result = validateAndFormatText(editInput);
+    if (!result.isValid) {
+      setValidationMessage(result.message);
+      return;
+    }
+
+    setTodos(todos.map((todo, i) => 
+      i === index ? { ...todo, text: result.formattedText } : todo
+    ));
+    setEditingIndex(-1);
+    setValidationMessage("");
+  };
+
+  /**
+   * Cancels the editing mode
+   */
+  const cancelEdit = () => {
+    setEditingIndex(-1);
+    setValidationMessage("");
   };
 
   return (
@@ -143,16 +197,81 @@ function TodoListCopilot() {
                 onChange={() => toggleTodo(idx)}
                 aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
               />
-              <span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
-                {todo.text}
-              </span>
+              {editingIndex === idx ? (
+                <div className="edit-container">
+                  <input
+                    type="text"
+                    value={editInput}
+                    onChange={(e) => {
+                      setEditInput(e.target.value);
+                      setValidationMessage("");
+                    }}
+                    onKeyPress={(e) => e.key === 'Enter' && saveEdit(idx)}
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => saveEdit(idx)}
+                    aria-label="Save changes"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    aria-label="Cancel editing"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+                    {todo.text}
+                  </span>
+                  <div className="button-container">
+                    <button
+                      onClick={() => startEditing(idx)}
+                      aria-label={`Edit todo "${todo.text}"`}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => removeTodo(idx)}
+                      aria-label={`Delete todo "${todo.text}"`}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
               <button
-                onClick={() => removeTodo(idx)}
-                aria-label={`Delete todo "${todo.text}"`}
+                onClick={() => startEditing(idx)}
+                aria-label={`Edit todo "${todo.text}"`}
               >
-                Delete
+                Edit
               </button>
             </div>
+            {editingIndex === idx && (
+              <div className="edit-container">
+                <input
+                  value={editInput}
+                  onChange={(e) => setEditInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && saveEdit(idx)}
+                  aria-label={`Edit todo "${todo.text}"`}
+                />
+                <button
+                  onClick={() => saveEdit(idx)}
+                  aria-label={`Save edit for todo "${todo.text}"`}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  aria-label="Cancel edit"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </li>
         ))}
       </ul>

@@ -41,6 +41,52 @@
   background-color: #c82333;
 }
 
+.edit-container {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.edit-container input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.edit-container button {
+  padding: 4px 8px;
+}
+
+.edit-container button:first-of-type {
+  background-color: #28a745;
+}
+
+.edit-container button:first-of-type:hover {
+  background-color: #218838;
+}
+
+.edit-container button:last-of-type {
+  background-color: #6c757d;
+}
+
+.edit-container button:last-of-type:hover {
+  background-color: #5a6268;
+}
+
+.button-container {
+  display: flex;
+  gap: 8px;
+}
+
+.button-container button:first-of-type {
+  background-color: #007bff;
+}
+
+.button-container button:first-of-type:hover {
+  background-color: #0056b3;
+}
+
 .completed .todo-item {
   background-color: #e9ecef;
   opacity: 0.8;

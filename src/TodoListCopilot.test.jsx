@@ -201,4 +201,82 @@ describe('TodoListCopilot', () => {
       expect(checkbox).toHaveAttribute('aria-label', expect.stringContaining('incomplete'));
     });
   });
+
+  describe('Todo Editing', () => {
+    test('should enter edit mode when clicking edit button', () => {
+      // Add a todo
+      fireEvent.change(input, { target: { value: 'Test todo' } });
+      fireEvent.click(addButton);
+
+      // Click edit button
+      const editButton = screen.getByLabelText('Edit todo "Test todo"');
+      fireEvent.click(editButton);
+
+      // Verify edit mode
+      const editInput = screen.getByDisplayValue('Test todo');
+      expect(editInput).toBeInTheDocument();
+      expect(screen.getByText('Save')).toBeInTheDocument();
+      expect(screen.getByText('Cancel')).toBeInTheDocument();
+    });
+
+    test('should validate edited text', () => {
+      // Add a todo
+      fireEvent.change(input, { target: { value: 'Original todo' } });
+      fireEvent.click(addButton);
+
+      // Enter edit mode
+      const editButton = screen.getByLabelText('Edit todo "Original todo"');
+      fireEvent.click(editButton);
+
+      // Try to save invalid input
+      const editInput = screen.getByDisplayValue('Original todo');
+      fireEvent.change(editInput, { target: { value: '!@#$' } });
+      const saveButton = screen.getByText('Save');
+      fireEvent.click(saveButton);
+
+      // Verify validation message
+      expect(screen.getByText('Only letters, numbers, and spaces are allowed')).toBeInTheDocument();
+      expect(editInput).toBeInTheDocument(); // Still in edit mode
+    });
+
+    test('should save valid edits', () => {
+      // Add a todo
+      fireEvent.change(input, { target: { value: 'Original todo' } });
+      fireEvent.click(addButton);
+
+      // Enter edit mode
+      const editButton = screen.getByLabelText('Edit todo "Original todo"');
+      fireEvent.click(editButton);
+
+      // Make valid edit
+      const editInput = screen.getByDisplayValue('Original todo');
+      fireEvent.change(editInput, { target: { value: 'Updated todo' } });
+      const saveButton = screen.getByText('Save');
+      fireEvent.click(saveButton);
+
+      // Verify changes
+      expect(screen.getByText('Updated todo')).toBeInTheDocument();
+      expect(screen.queryByDisplayValue('Updated todo')).not.toBeInTheDocument(); // No longer in edit mode
+    });
+
+    test('should cancel edits', () => {
+      // Add a todo
+      fireEvent.change(input, { target: { value: 'Original todo' } });
+      fireEvent.click(addButton);
+
+      // Enter edit mode
+      const editButton = screen.getByLabelText('Edit todo "Original todo"');
+      fireEvent.click(editButton);
+
+      // Make changes and cancel
+      const editInput = screen.getByDisplayValue('Original todo');
+      fireEvent.change(editInput, { target: { value: 'Changed todo' } });
+      const cancelButton = screen.getByText('Cancel');
+      fireEvent.click(cancelButton);
+
+      // Verify original text remains
+      expect(screen.getByText('Original todo')).toBeInTheDocument();
+      expect(screen.queryByDisplayValue('Changed todo')).not.toBeInTheDocument();
+    });
+  });
 });
